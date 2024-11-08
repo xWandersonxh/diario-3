@@ -36,7 +36,7 @@ function addActivity() {
 
     const activityInput = document.getElementById("activity");
     const dueDateInput = document.getElementById("dueDate");
-    
+
     const activityText = activityInput.value;
     const dueDate = dueDateInput.value;
 
@@ -66,23 +66,28 @@ function displayActivity(activityItem) {
     const activityList = document.getElementById("activityList");
 
     const activityElement = document.createElement("li");
-    activityElement.innerHTML = `
-        <span>${activityItem.text} - Data de entrega: ${activityItem.dueDate}</span>
-        ${isLeader ? '<span class="delete-btn" onclick="deleteActivity(this)">&#10006;</span>' : ''}
-    `;
+    activityElement.textContent = `${activityItem.text} - Data de entrega: ${activityItem.dueDate}`;
+
+    // Adiciona o botão de exclusão apenas para o líder
+    if (isLeader) {
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Remover";
+        deleteButton.classList.add("delete-btn");
+        deleteButton.onclick = function () {
+            deleteActivity(activityElement, activityItem.text);
+        };
+        activityElement.appendChild(deleteButton);
+    }
 
     activityList.appendChild(activityElement);
 }
 
 // Função para excluir atividade (apenas para o líder)
-function deleteActivity(element) {
+function deleteActivity(activityElement, activityText) {
     if (!isLeader) {
         alert("Apenas o líder pode remover atividades.");
         return;
     }
-
-    const activityElement = element.parentElement;
-    const activityText = activityElement.innerText.split(" - Data de entrega: ")[0];
 
     // Remove a atividade do localStorage
     removeActivity(activityText);
@@ -109,4 +114,31 @@ function removeActivity(activityText) {
     let activities = JSON.parse(localStorage.getItem("activities")) || [];
     activities = activities.filter(activity => activity.text !== activityText);
     localStorage.setItem("activities", JSON.stringify(activities));
+}
+// Função para formatar a data para o formato brasileiro (dia/mês/ano)
+function formatDate(dateString) {
+    const [year, month, day] = dateString.split("-"); // Separa ano, mês e dia
+    return `${day}/${month}/${year}`; // Retorna no formato dd/mm/yyyy
+}
+
+// Função para exibir uma atividade na lista
+function displayActivity(activityItem) {
+    const activityList = document.getElementById("activityList");
+
+    const activityElement = document.createElement("li");
+    const formattedDate = formatDate(activityItem.dueDate); // Formata a data
+    activityElement.textContent = `${activityItem.text} - Data de entrega: ${formattedDate}`;
+
+    // Adiciona o botão de exclusão apenas para o líder
+    if (isLeader) {
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Remover";
+        deleteButton.classList.add("delete-btn");
+        deleteButton.onclick = function () {
+            deleteActivity(activityElement, activityItem.text);
+        };
+        activityElement.appendChild(deleteButton);
+    }
+
+    activityList.appendChild(activityElement);
 }
